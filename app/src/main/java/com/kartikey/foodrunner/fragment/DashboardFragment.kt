@@ -16,12 +16,9 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.kartikey.foodrunner.R
 import com.kartikey.foodrunner.adapter.DashboardFragmentAdapter
+import com.kartikey.foodrunner.database.FirebaseHelper
 import com.kartikey.foodrunner.model.Restaurant
 import com.kartikey.foodrunner.utils.ConnectionManager
 import kotlinx.android.synthetic.main.sort_radio_button.view.*
@@ -55,123 +52,66 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
 
     var costComparator = Comparator<Restaurant>
     { rest1, rest2 ->
-        rest1.costForOne.compareTo(rest2.costForOne, true)
+
+        if (rest1.costForOne.compareTo(rest2.costForOne, true) == 0) {
+            rest1.restaurantName.compareTo(rest2.restaurantName, true)
+        } else {
+            rest1.costForOne.compareTo(rest2.costForOne, true)
+        }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        setHasOptionsMenu(true)
         val view = inflater.inflate(R.layout.fragment_dashboard, container, false)
 
-        layoutManager = LinearLayoutManager(activity)
-        recyclerView = view.findViewById(R.id.recyclerViewDashboard)
+        setHasOptionsMenu(true)
         etSearch = view.findViewById(R.id.etSearch)
-        progressDialog = view.findViewById(R.id.dashboardProgressDialog)
-        rlNoRestaurantFound = view.findViewById(R.id.noRestaurantFound)
+        recyclerView = view.findViewById(R.id.recyclerDashboard)
 
-        rlNoRestaurantFound.visibility = View.INVISIBLE
-
-        fun filterFun(strTyped: String) {
-            rlNoRestaurantFound.visibility = View.INVISIBLE
-            val filteredList = arrayListOf<Restaurant>()
-            for (item in restaurantInfoList) {
-                if (item.restaurantName.toLowerCase(Locale.ROOT)
-                        .contains(strTyped.toLowerCase(Locale.ROOT))
-                ) {
-                    filteredList.add(item)
-                }
-            }
-            if (filteredList.size == 0) {
-                rlNoRestaurantFound.visibility = View.VISIBLE
-            }
-            dashboardAdapter.filterList(filteredList)
-        }
+        progressDialog = view.findViewById(R.id.rlLoading)
+        rlNoRestaurantFound = view.findViewById(R.id.rlNoRestaurantFound)
+        layoutManager = LinearLayoutManager(activity)
 
         etSearch.addTextChangedListener(object : TextWatcher {
-            //as the user types the search filter is applied
-            override fun afterTextChanged(strTyped: Editable?) {
-                filterFun(strTyped.toString())
+            override fun afterTextChanged(p0: Editable?) {
+                filterFunction(p0.toString())
             }
 
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-        }
-        )
-        return view
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
 
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+        })
+
+        return view
     }
 
     fun fetchData() {
         if (ConnectionManager().checkConnectivity(activity as Context)) {
             progressDialog.visibility = View.VISIBLE
-            try {
-                val queue = Volley.newRequestQueue(activity as Context)
-                val url = "http://13.235.250.119/v2/restaurants/fetch_result/"
-
-                val jsonObjectRequest = object : JsonObjectRequest(
-                    Request.Method.GET,
-                    url,
-                    null,
-                    Response.Listener
-                    {
-                        val responseJsonObjectData = it.getJSONObject("data")
-                        val success = responseJsonObjectData.getBoolean("success")
-
-                        if (success) {
-                            val data = responseJsonObjectData.getJSONArray("data")
-
-                            for (i in 0 until data.length()) {
-                                val restaurantJsonObject = data.getJSONObject(i)
-                                val restaurantObject = Restaurant(
-                                    restaurantJsonObject.getString("id"),
-                                    restaurantJsonObject.getString("name"),
-                                    restaurantJsonObject.getString("rating"),
-                                    restaurantJsonObject.getString("cost_for_one"),
-                                    restaurantJsonObject.getString("image_url")
-                                )
-                                restaurantInfoList.add(restaurantObject)
-
-                                dashboardAdapter = DashboardFragmentAdapter(
-                                    activity as Context,
-                                    restaurantInfoList
-                                )
-                                recyclerView.adapter = dashboardAdapter
-                                recyclerView.layoutManager = layoutManager
-                            }
-                        }
-                        progressDialog.visibility = View.GONE
-                    },
-                    Response.ErrorListener
-                    {
-                        progressDialog.visibility = View.GONE
-                        Toast.makeText(
-                            activity as Context,
-                            "Some Error occurred!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }) {
-                    override fun getHeaders(): MutableMap<String, String> {
-                        val headers = HashMap<String, String>()
-                        headers["Content-type"] = "application/json"
-                        headers["token"] = "13714ab03e5a4d"
-                        return headers
-                    }
+            
+            FirebaseHelper.getAllRestaurants { restaurants ->
+                if (restaurants.isNotEmpty()) {
+                    restaurantInfoList.clear()
+                    restaurantInfoList.addAll(restaurants)
+                    
+                    dashboardAdapter = DashboardFragmentAdapter(activity as Context, restaurantInfoList)
+                    recyclerView.adapter = dashboardAdapter
+                    recyclerView.layoutManager = layoutManager
+                    
+                    rlNoRestaurantFound.visibility = View.GONE
+                } else {
+                    rlNoRestaurantFound.visibility = View.VISIBLE
                 }
-                queue.add(jsonObjectRequest)
-
-            } catch (e: JSONException) {
-                Toast.makeText(
-                    activity as Context,
-                    "Some Unexpected error occurred!",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                
+                progressDialog.visibility = View.GONE
             }
         } else {
-
             val alterDialog = androidx.appcompat.app.AlertDialog.Builder(activity as Context)
             alterDialog.setTitle("No Internet")
             alterDialog.setMessage("Internet Connection can't be established!")
@@ -188,7 +128,26 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
             alterDialog.create()
             alterDialog.show()
         }
+    }
 
+    fun filterFunction(str: String) {
+        val filteredList = arrayListOf<Restaurant>()
+
+        for (item in restaurantInfoList) {
+            if (item.restaurantName.toLowerCase(Locale.ROOT)
+                    .contains(str.toLowerCase(Locale.ROOT))
+            ) {
+                filteredList.add(item)
+            }
+        }
+
+        if (filteredList.size == 0) {
+            rlNoRestaurantFound.visibility = View.VISIBLE
+        } else {
+            rlNoRestaurantFound.visibility = View.GONE
+        }
+
+        dashboardAdapter.filterList(filteredList)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -197,46 +156,37 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-
-        when (id) {
-
-            R.id.sort -> {
-                radioButtonView = View.inflate(
-                    contextParam,
-                    R.layout.sort_radio_button,
-                    null
-                )     //radiobutton view for sorting display
-                val alterDialog = androidx.appcompat.app.AlertDialog.Builder(activity as Context)
-                alterDialog.setTitle("Sort By?")
-                alterDialog.setView(radioButtonView)
-                alterDialog.setPositiveButton("OK")
+        if (id == R.id.action_sort) {
+            radioButtonView = View.inflate(contextParam, R.layout.sort_radio_button, null)
+            androidx.appcompat.app.AlertDialog.Builder(activity as Context)
+                .setTitle("Sort By?")
+                .setView(radioButtonView)
+                .setPositiveButton("OK")
                 { _, _ ->
-                    if (radioButtonView.radioHighToLow.isChecked) {
+                    if (radioButtonView.radio_high_to_low.isChecked) {
                         Collections.sort(restaurantInfoList, costComparator)
                         restaurantInfoList.reverse()
-                        dashboardAdapter.notifyDataSetChanged()     //update the adapter of changes
+                        dashboardAdapter.notifyDataSetChanged()
                     }
-                    if (radioButtonView.radioLowToHigh.isChecked) {
+                    if (radioButtonView.radio_low_to_high.isChecked) {
                         Collections.sort(restaurantInfoList, costComparator)
-                        dashboardAdapter.notifyDataSetChanged()     //updates the adapter of changes
+                        dashboardAdapter.notifyDataSetChanged()
                     }
-                    if (radioButtonView.radioRating.isChecked) {
+                    if (radioButtonView.radio_rating.isChecked) {
                         Collections.sort(restaurantInfoList, ratingComparator)
                         restaurantInfoList.reverse()
                         dashboardAdapter.notifyDataSetChanged()
                     }
                 }
-                alterDialog.setNegativeButton("CANCEL")
+                .setNegativeButton("Cancel")
                 { _, _ ->
-                    //do nothing
+
                 }
-                alterDialog.create()
-                alterDialog.show()
-            }
+                .create()
+                .show()
         }
         return super.onOptionsItemSelected(item)
     }
-
 
     override fun onResume() {
         if (ConnectionManager().checkConnectivity(activity as Context)) {
