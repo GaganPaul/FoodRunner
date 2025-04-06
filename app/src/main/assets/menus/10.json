@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Chocolate Cake",
+    "cost_for_one": "180"
+  },
+  {
+    "id": "2",
+    "name": "Ice Cream",
+    "cost_for_one": "120"
+  },
+  {
+    "id": "3",
+    "name": "Brownie",
+    "cost_for_one": "150"
+  },
+  {
+    "id": "4",
+    "name": "Pastry",
+    "cost_for_one": "80"
+  },
+  {
+    "id": "5",
+    "name": "Milkshake",
+    "cost_for_one": "100"
+  },
+  {
+    "id": "6",
+    "name": "Waffles",
+    "cost_for_one": "160"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Veggie Delight",
+    "cost_for_one": "180"
+  },
+  {
+    "id": "2",
+    "name": "Chicken Teriyaki",
+    "cost_for_one": "220"
+  },
+  {
+    "id": "3",
+    "name": "Italian BMT",
+    "cost_for_one": "250"
+  },
+  {
+    "id": "4",
+    "name": "Tuna",
+    "cost_for_one": "200"
+  },
+  {
+    "id": "5",
+    "name": "Cookies",
+    "cost_for_one": "50"
+  },
+  {
+    "id": "6",
+    "name": "Soft Drink",
+    "cost_for_one": "60"
+  }
+]

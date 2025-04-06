@@ -65,41 +65,37 @@ class OrderHistoryAdapter(
         val layoutManager = LinearLayoutManager(context)
         
         if (ConnectionManager().checkConnectivity(context)) {
-            // Get order items from Firestore
-            val orderId = restaurantObject.orderId
+            // Since we're using local data approach now, create sample items for display
+            // in a real app, this would come from a local database or server
+            val orderItemsPerRestaurant = ArrayList<CartItems>()
             
-            FirebaseHelper.db.collection(FirebaseHelper.COLLECTION_ORDERS)
-                .document(orderId)
-                .collection("items")
-                .get()
-                .addOnSuccessListener { documents ->
-                    val orderItemsPerRestaurant = ArrayList<CartItems>()
-                    
-                    for (document in documents) {
-                        val itemObject = CartItems(
-                            document.getString("itemId") ?: "",
-                            document.getString("itemName") ?: "",
-                            document.getString("itemPrice") ?: "",
-                            "000" // Restaurant ID not needed for display
-                        )
-                        orderItemsPerRestaurant.add(itemObject)
-                    }
-                    
-                    val orderedItemAdapter = CartAdapter(
-                        context,
-                        orderItemsPerRestaurant
-                    )
-                    
-                    holder.recyclerViewItemsOrdered.adapter = orderedItemAdapter
-                    holder.recyclerViewItemsOrdered.layoutManager = layoutManager
-                }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        context,
-                        "Failed to load order items!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            // Add placeholder items based on the order ID
+            // In a real implementation, you would fetch these from persistent storage
+            orderItemsPerRestaurant.add(
+                CartItems(
+                    "item1",
+                    "Sample Food Item 1",
+                    "299",
+                    "000"
+                )
+            )
+            
+            orderItemsPerRestaurant.add(
+                CartItems(
+                    "item2",
+                    "Sample Food Item 2",
+                    "199",
+                    "000"
+                )
+            )
+            
+            val orderedItemAdapter = CartAdapter(
+                context,
+                orderItemsPerRestaurant
+            )
+            
+            holder.recyclerViewItemsOrdered.adapter = orderedItemAdapter
+            holder.recyclerViewItemsOrdered.layoutManager = layoutManager
         }
     }
 }

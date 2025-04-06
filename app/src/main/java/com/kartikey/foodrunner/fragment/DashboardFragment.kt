@@ -69,10 +69,10 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
 
         setHasOptionsMenu(true)
         etSearch = view.findViewById(R.id.etSearch)
-        recyclerView = view.findViewById(R.id.recyclerDashboard)
+        recyclerView = view.findViewById(R.id.recyclerViewDashboard)
 
-        progressDialog = view.findViewById(R.id.rlLoading)
-        rlNoRestaurantFound = view.findViewById(R.id.rlNoRestaurantFound)
+        progressDialog = view.findViewById(R.id.dashboardProgressDialog)
+        rlNoRestaurantFound = view.findViewById(R.id.noRestaurantFound)
         layoutManager = LinearLayoutManager(activity)
 
         etSearch.addTextChangedListener(object : TextWatcher {
@@ -95,7 +95,7 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
         if (ConnectionManager().checkConnectivity(activity as Context)) {
             progressDialog.visibility = View.VISIBLE
             
-            FirebaseHelper.getAllRestaurants { restaurants ->
+            FirebaseHelper.getAllRestaurants(activity as Context) { restaurants ->
                 if (restaurants.isNotEmpty()) {
                     restaurantInfoList.clear()
                     restaurantInfoList.addAll(restaurants)
@@ -156,23 +156,23 @@ class DashboardFragment(val contextParam: Context) : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
-        if (id == R.id.action_sort) {
+        if (id == R.id.sort) {
             radioButtonView = View.inflate(contextParam, R.layout.sort_radio_button, null)
             androidx.appcompat.app.AlertDialog.Builder(activity as Context)
                 .setTitle("Sort By?")
                 .setView(radioButtonView)
                 .setPositiveButton("OK")
                 { _, _ ->
-                    if (radioButtonView.radio_high_to_low.isChecked) {
+                    if (radioButtonView.radioHighToLow.isChecked) {
                         Collections.sort(restaurantInfoList, costComparator)
                         restaurantInfoList.reverse()
                         dashboardAdapter.notifyDataSetChanged()
                     }
-                    if (radioButtonView.radio_low_to_high.isChecked) {
+                    if (radioButtonView.radioLowToHigh.isChecked) {
                         Collections.sort(restaurantInfoList, costComparator)
                         dashboardAdapter.notifyDataSetChanged()
                     }
-                    if (radioButtonView.radio_rating.isChecked) {
+                    if (radioButtonView.radioRating.isChecked) {
                         Collections.sort(restaurantInfoList, ratingComparator)
                         restaurantInfoList.reverse()
                         dashboardAdapter.notifyDataSetChanged()

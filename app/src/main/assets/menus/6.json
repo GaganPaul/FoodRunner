@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Chicken Bucket",
+    "cost_for_one": "450"
+  },
+  {
+    "id": "2",
+    "name": "Hot Wings",
+    "cost_for_one": "250"
+  },
+  {
+    "id": "3",
+    "name": "Zinger Burger",
+    "cost_for_one": "180"
+  },
+  {
+    "id": "4",
+    "name": "French Fries",
+    "cost_for_one": "120"
+  },
+  {
+    "id": "5",
+    "name": "Chicken Popcorn",
+    "cost_for_one": "160"
+  },
+  {
+    "id": "6",
+    "name": "Cold Drink",
+    "cost_for_one": "60"
+  }
+]

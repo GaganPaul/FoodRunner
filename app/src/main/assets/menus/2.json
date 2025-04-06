@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Whopper",
+    "cost_for_one": "250"
+  },
+  {
+    "id": "2",
+    "name": "Chicken Royale",
+    "cost_for_one": "220"
+  },
+  {
+    "id": "3",
+    "name": "Veggie Burger",
+    "cost_for_one": "180"
+  },
+  {
+    "id": "4",
+    "name": "Fries (Medium)",
+    "cost_for_one": "100"
+  },
+  {
+    "id": "5",
+    "name": "Chicken Nuggets",
+    "cost_for_one": "150"
+  },
+  {
+    "id": "6",
+    "name": "Soft Drink",
+    "cost_for_one": "80"
+  }
+]

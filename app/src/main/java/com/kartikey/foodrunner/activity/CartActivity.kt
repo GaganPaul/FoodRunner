@@ -49,10 +49,10 @@ class CartActivity : AppCompatActivity() {
         selectedItemsId = intent.getStringArrayListExtra("selectedItemsId") as ArrayList<String>
 
         toolbar = findViewById(R.id.toolBar)
-        txtRestaurantName = findViewById(R.id.txtRestaurantName)
+        txtRestaurantName = findViewById(R.id.txtOrderingFrom)
         txtRestaurantName.text = restaurantName
         btnPlaceOrder = findViewById(R.id.btnPlaceOrder)
-        progressLayout = findViewById(R.id.progressLayout)
+        progressLayout = findViewById(R.id.activityCartProgressLayout)
 
         btnPlaceOrder.setOnClickListener {
             val sharedPreferences = getSharedPreferences(
@@ -129,7 +129,7 @@ class CartActivity : AppCompatActivity() {
             )
             val userId = sharedPreferences.getString("user_id", "0")!!
             
-            FirebaseHelper.getRestaurantMenu(restaurantId) { menuItems ->
+            FirebaseHelper.getRestaurantMenu(this, restaurantId) { menuItems ->
                 if (menuItems.isNotEmpty()) {
                     cartListItems.clear()
                     totalCost = 0

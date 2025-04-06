@@ -2,9 +2,12 @@ package com.kartikey.foodrunner.fragment
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -12,16 +15,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.app.ActivityCompat
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.kartikey.foodrunner.R
 import com.kartikey.foodrunner.activity.DashboardActivity
 import com.kartikey.foodrunner.utils.ConnectionManager
-import org.json.JSONException
-import org.json.JSONObject
-
 
 class LoginFragment(val contextParam: Context) : Fragment() {
     lateinit var txtSignUp: TextView
@@ -50,34 +46,37 @@ class LoginFragment(val contextParam: Context) : Fragment() {
         txtForgotPassword.paintFlags = Paint.UNDERLINE_TEXT_FLAG
         txtSignUp.paintFlags = Paint.UNDERLINE_TEXT_FLAG
 
-        txtForgotPassword.setOnClickListener {
-            openForgotPasswordInputFragment()
-        }
+        txtForgotPassword.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                openForgotPasswordInputFragment()
+            }
+        })
 
-        txtSignUp.setOnClickListener {
-            openRegisterFragment()
-        }
+        txtSignUp.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                openRegisterFragment()
+            }
+        })
 
-        btnLogin.setOnClickListener {
+        btnLogin.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                btnLogin.visibility = View.GONE
 
-            btnLogin.visibility = View.GONE
-
-            if (etMobileNumber.text.isBlank()) {
-                etMobileNumber.setError("Mobile Number Missing")
-                btnLogin.visibility = View.VISIBLE
-            } else {
-                if (etPassword.text.isBlank()) {
+                if (etMobileNumber.text.isBlank()) {
+                    etMobileNumber.error = "Mobile Number Missing"
                     btnLogin.visibility = View.VISIBLE
-                    etPassword.setError("Missing Password")
+                } else if (etPassword.text.isBlank()) {
+                    btnLogin.visibility = View.VISIBLE
+                    etPassword.error = "Missing Password"
                 } else {
                     loginUserFun()
                 }
             }
-        }
+        })
         return view
     }
 
-    fun openForgotPasswordInputFragment() {
+    private fun openForgotPasswordInputFragment() {
         val transaction = fragmentManager?.beginTransaction()
         transaction?.replace(
             R.id.frameLayout,
@@ -86,8 +85,7 @@ class LoginFragment(val contextParam: Context) : Fragment() {
         transaction?.commit()//apply changes
     }
 
-
-    fun openRegisterFragment() {
+    private fun openRegisterFragment() {
         val transaction = fragmentManager?.beginTransaction()
         transaction?.replace(
             R.id.frameLayout,
@@ -96,143 +94,94 @@ class LoginFragment(val contextParam: Context) : Fragment() {
         transaction?.commit()
     }
 
-
-    fun loginUserFun() {
-        val sharedPreferencess = contextParam.getSharedPreferences(
+    private fun loginUserFun() {
+        val sharedPreferences = contextParam.getSharedPreferences(
             getString(R.string.shared_preferences),
             Context.MODE_PRIVATE
         )
 
         if (ConnectionManager().checkConnectivity(activity as Context)) {
             loginProgressDialog.visibility = View.VISIBLE
-            try {
-                val loginUser = JSONObject()
-                loginUser.put("mobile_number", etMobileNumber.text)
-                loginUser.put("password", etPassword.text)
-
-                val queue = Volley.newRequestQueue(activity as Context)
-                val url = "http://13.235.250.119/v2/login/fetch_result/"
-
-                val jsonObjectRequest = object : JsonObjectRequest(
-                    Request.Method.POST,
-                    url,
-                    loginUser,
-                    Response.Listener
-                    {
-                        val responseJsonObjectData = it.getJSONObject("data")
-                        val success = responseJsonObjectData.getBoolean("success")
-
-
-                        if (success) {
-                            val data = responseJsonObjectData.getJSONObject("data")
-                            sharedPreferencess.edit().putBoolean("user_logged_in", true).apply()
-                            sharedPreferencess.edit()
-                                .putString("user_id", data.getString("user_id")).apply()
-                            sharedPreferencess.edit().putString("name", data.getString("name"))
-                                .apply()
-                            sharedPreferencess.edit().putString("email", data.getString("email"))
-                                .apply()
-                            sharedPreferencess.edit()
-                                .putString("mobile_number", data.getString("mobile_number")).apply()
-                            sharedPreferencess.edit()
-                                .putString("address", data.getString("address")).apply()
-
-                            Toast.makeText(
-                                contextParam,
-                                "Welcome " + data.getString("name"),
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            userSuccessfullyLoggedIn()
-
-                        } else {
-                            btnLogin.visibility = View.VISIBLE
-
-                            val responseMessageServer =
-                                responseJsonObjectData.getString("errorMessage")
-                            Toast.makeText(
-                                contextParam,
-                                responseMessageServer.toString(),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        loginProgressDialog.visibility = View.GONE
-                    },
-                    Response.ErrorListener
-                    {
-                        println(it)
-                        btnLogin.visibility = View.VISIBLE
-                        loginProgressDialog.visibility = View.GONE
+            
+            // Simulate API call with a delay
+            Handler(Looper.getMainLooper()).postDelayed(object : Runnable {
+                override fun run() {
+                    // For demo purposes, accept any login with password length >= 4
+                    if (etPassword.text.length >= 4) {
+                        // Login success
+                        val userMobileNumber = etMobileNumber.text.toString()
+                        val userName = "Demo User" // Mock data
+                        
+                        // Save login info to SharedPreferences
+                        val editor = sharedPreferences.edit()
+                        editor.putBoolean("user_logged_in", true)
+                        editor.putString("user_id", "123456") // Mock ID
+                        editor.putString("name", userName)
+                        editor.putString("email", "user@example.com") // Mock email
+                        editor.putString("mobile_number", userMobileNumber)
+                        editor.putString("address", "123 Main Street") // Mock address
+                        editor.apply()
 
                         Toast.makeText(
                             contextParam,
-                            "Some Error occurred!!!",
-                            Toast.LENGTH_SHORT
+                            "Welcome " + userName,
+                            Toast.LENGTH_LONG
                         ).show()
 
-
-                    }) {
-                    override fun getHeaders(): MutableMap<String, String> {
-                        val headers = HashMap<String, String>()
-                        headers["Content-type"] = "application/json"
-                        headers["token"] = "13714ab03e5a4d"
-                        return headers
+                        userSuccessfullyLoggedIn()
+                    } else {
+                        // Login failed
+                        btnLogin.visibility = View.VISIBLE
+                        Toast.makeText(
+                            contextParam,
+                            "Invalid Credentials! Please try again.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+                    
+                    loginProgressDialog.visibility = View.GONE
                 }
-                queue.add(jsonObjectRequest)
-
-            } catch (e: JSONException) {
-                btnLogin.visibility = View.VISIBLE
-                Toast.makeText(
-                    contextParam,
-                    "Some unexpected error occurred!",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            }, 1500) // 1.5 second delay
+            
         } else {
             btnLogin.visibility = View.VISIBLE
-
-            val alterDialog = androidx.appcompat.app.AlertDialog.Builder(activity as Context)
-            alterDialog.setTitle("No Internet")
-            alterDialog.setMessage("Internet Connection can't be established!")
-            alterDialog.setPositiveButton("Open Settings")
-            { _, _ ->
-                val settingsIntent = Intent(Settings.ACTION_SETTINGS)
-                startActivity(settingsIntent)
-            }
-            alterDialog.setNegativeButton("Exit")
-            { _, _ ->
-                ActivityCompat.finishAffinity(activity as Activity)
-            }
-            alterDialog.create()
-            alterDialog.show()
+            showNoInternetDialog()
         }
     }
 
-    fun userSuccessfullyLoggedIn() {
+    private fun userSuccessfullyLoggedIn() {
         val intent = Intent(activity as Context, DashboardActivity::class.java)
         startActivity(intent)
-        activity?.finish();
+        activity?.finish()
+    }
+
+    private fun showNoInternetDialog() {
+        val alterDialog = androidx.appcompat.app.AlertDialog.Builder(activity as Context)
+        alterDialog.setTitle("No Internet")
+        alterDialog.setMessage("Internet Connection can't be established!")
+        alterDialog.setPositiveButton("Open Settings", 
+            object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    val settingsIntent = Intent(Settings.ACTION_SETTINGS)
+                    startActivity(settingsIntent)
+                }
+            }
+        )
+        alterDialog.setNegativeButton("Exit", 
+            object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+                    ActivityCompat.finishAffinity(activity as Activity)
+                }
+            }
+        )
+        alterDialog.setCancelable(false)
+        alterDialog.create().show()
     }
 
     override fun onResume() {
-        if (!ConnectionManager().checkConnectivity(activity as Context)) {
-            val alterDialog = androidx.appcompat.app.AlertDialog.Builder(activity as Context)
-            alterDialog.setTitle("No Internet")
-            alterDialog.setMessage("Internet Connection can't be established!")
-            alterDialog.setPositiveButton("Open Settings")
-            { _, _ ->
-                val settingsIntent = Intent(Settings.ACTION_SETTINGS)
-                startActivity(settingsIntent)
-            }
-            alterDialog.setNegativeButton("Exit")
-            { _, _ ->
-                ActivityCompat.finishAffinity(activity as Activity)
-            }
-            alterDialog.setCancelable(false)
-            alterDialog.create()
-            alterDialog.show()
-        }
         super.onResume()
+        if (!ConnectionManager().checkConnectivity(activity as Context)) {
+            showNoInternetDialog()
+        }
     }
 }

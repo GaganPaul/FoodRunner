@@ -3,17 +3,32 @@
 </p>
 
 # FoodRunner-App
-Android App for ordering food online build using Kotlin and XML
+Android App for ordering food online built using Kotlin and XML
 
-The app is built in Kotlin and uses Volley library to send GET and POST requests through REST api calls.
-The app also uses the Room library to send data to the SQLite local database.
+The app is built in Kotlin and uses Firebase Firestore for online data storage and retrieval. It also loads restaurant images and menu data from local assets while functioning as an online food delivery app.
 
-### Main features learned while developing the app
+### Main features of the app
 1. Recycler Views
 2. Fragments
-3. Room Library
-4. Volley
+3. Firebase Firestore Integration
+4. Local Asset Loading
 5. Adapters
+6. Favorites Management
+7. Cart Functionality
+8. Order History
+
+## How to use the app
+1. Launch the app and log in with your credentials
+2. Browse the list of restaurants
+3. Select a restaurant to view its menu
+4. Add items to your cart
+5. Place your order
+6. View your order history in the profile section
+
+## How the app works
+- The app loads restaurant data and images from local assets
+- When you interact with the app (adding favorites, placing orders, etc.), the data is stored in Firebase
+- This hybrid approach allows for fast loading of images while maintaining online functionality
 
 ## How to contribute
 - Click the fork button to get the repo to your account.
@@ -48,5 +63,3 @@ The app also uses the Room library to send data to the SQLite local database.
 <p align="left">
   <img width="300" height="600" src="https://github.com/KartikeySharma/FoodRunner-App/blob/master/Screenshots/21.Order_Placed_Sucessfully.jpeg">
 </p>
-
-

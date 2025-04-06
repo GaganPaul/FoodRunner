@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Butter Chicken",
+    "cost_for_one": "350"
+  },
+  {
+    "id": "2",
+    "name": "Paneer Tikka",
+    "cost_for_one": "280"
+  },
+  {
+    "id": "3",
+    "name": "Dal Makhani",
+    "cost_for_one": "200"
+  },
+  {
+    "id": "4",
+    "name": "Naan",
+    "cost_for_one": "50"
+  },
+  {
+    "id": "5",
+    "name": "Tandoori Roti",
+    "cost_for_one": "30"
+  },
+  {
+    "id": "6",
+    "name": "Jeera Rice",
+    "cost_for_one": "150"
+  }
+]

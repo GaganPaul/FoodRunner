@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Margherita Pizza",
+    "cost_for_one": "300"
+  },
+  {
+    "id": "2",
+    "name": "Pepperoni Pizza",
+    "cost_for_one": "400"
+  },
+  {
+    "id": "3",
+    "name": "Veggie Supreme Pizza",
+    "cost_for_one": "350"
+  },
+  {
+    "id": "4",
+    "name": "Garlic Bread",
+    "cost_for_one": "150"
+  },
+  {
+    "id": "5",
+    "name": "Pasta Alfredo",
+    "cost_for_one": "250"
+  },
+  {
+    "id": "6",
+    "name": "Chocolate Lava Cake",
+    "cost_for_one": "120"
+  }
+]

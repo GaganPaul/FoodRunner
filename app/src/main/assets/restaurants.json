@@ -1,0 +1,72 @@
+[
+  {
+    "id": "1",
+    "name": "Pind Tadka",
+    "rating": "4.5",
+    "cost_for_one": "300",
+    "image_name": "restaurant1.jpg"
+  },
+  {
+    "id": "2",
+    "name": "Burger King",
+    "rating": "4.2",
+    "cost_for_one": "250",
+    "image_name": "restaurant2.jpg"
+  },
+  {
+    "id": "3",
+    "name": "Pizza Hut",
+    "rating": "4.3",
+    "cost_for_one": "400",
+    "image_name": "restaurant3.jpg"
+  },
+  {
+    "id": "4",
+    "name": "Subway",
+    "rating": "4.0",
+    "cost_for_one": "200",
+    "image_name": "restaurant4.jpg"
+  },
+  {
+    "id": "5",
+    "name": "Domino's Pizza",
+    "rating": "4.1",
+    "cost_for_one": "350",
+    "image_name": "restaurant5.jpg"
+  },
+  {
+    "id": "6",
+    "name": "KFC",
+    "rating": "3.9",
+    "cost_for_one": "300",
+    "image_name": "restaurant6.jpg"
+  },
+  {
+    "id": "7",
+    "name": "Biryani House",
+    "rating": "4.4",
+    "cost_for_one": "250",
+    "image_name": "restaurant7.jpg"
+  },
+  {
+    "id": "8",
+    "name": "Chinese Corner",
+    "rating": "4.0",
+    "cost_for_one": "200",
+    "image_name": "restaurant8.jpg"
+  },
+  {
+    "id": "9",
+    "name": "South Indian Delights",
+    "rating": "4.2",
+    "cost_for_one": "150",
+    "image_name": "restaurant9.jpg"
+  },
+  {
+    "id": "10",
+    "name": "Dessert Paradise",
+    "rating": "4.6",
+    "cost_for_one": "200",
+    "image_name": "restaurant10.jpg"
+  }
+]

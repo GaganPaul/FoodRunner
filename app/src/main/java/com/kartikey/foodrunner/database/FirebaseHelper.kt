@@ -2,13 +2,11 @@ package com.kartikey.foodrunner.database
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import com.kartikey.foodrunner.model.CartItems
 import com.kartikey.foodrunner.model.OrderHistoryRestaurant
 import com.kartikey.foodrunner.model.Restaurant
 import com.kartikey.foodrunner.model.RestaurantMenu
-import kotlinx.coroutines.tasks.await
+import com.kartikey.foodrunner.utils.LocalAssetManager
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -17,7 +15,6 @@ import kotlin.collections.HashMap
 object FirebaseHelper {
 
     private const val TAG = "FirebaseHelper"
-    val db = FirebaseFirestore.getInstance()
     
     // Collection references - made public for access from adapters
     const val COLLECTION_RESTAURANTS = "restaurants"
@@ -26,289 +23,105 @@ object FirebaseHelper {
     const val COLLECTION_ORDERS = "orders"
     const val COLLECTION_CART = "cart"
     const val COLLECTION_MENU = "menu"
+    
+    // Local storage for favorites, cart, and orders
+    private val favoriteRestaurants = HashMap<String, HashMap<String, Restaurant>>()
+    private val cartItems = HashMap<String, HashMap<String, CartItems>>()
+    private val orderHistory = HashMap<String, ArrayList<OrderHistoryRestaurant>>()
 
     // Save restaurant to favorites collection
     fun saveRestaurantToFavorites(userId: String, restaurant: Restaurant, callback: (Boolean) -> Unit) {
-        val favoriteRef = db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_FAVORITES)
-            .document(restaurant.restaurantId)
-
-        val restaurantMap = hashMapOf(
-            "restaurantId" to restaurant.restaurantId,
-            "restaurantName" to restaurant.restaurantName,
-            "restaurantRating" to restaurant.restaurantRating,
-            "costForOne" to restaurant.costForOne,
-            "restaurantImage" to restaurant.restaurantImage
-        )
-
-        favoriteRef.set(restaurantMap)
-            .addOnSuccessListener {
-                callback(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error saving restaurant to favorites", e)
-                callback(false)
-            }
+        if (!favoriteRestaurants.containsKey(userId)) {
+            favoriteRestaurants[userId] = HashMap()
+        }
+        favoriteRestaurants[userId]?.put(restaurant.restaurantId, restaurant)
+        callback(true)
     }
 
     // Check if restaurant is in favorites
     fun isRestaurantInFavorites(userId: String, restaurantId: String, callback: (Boolean) -> Unit) {
-        db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_FAVORITES)
-            .document(restaurantId)
-            .get()
-            .addOnSuccessListener { document ->
-                callback(document != null && document.exists())
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error checking favorite status", e)
-                callback(false)
-            }
+        val isFavorite = favoriteRestaurants[userId]?.containsKey(restaurantId) ?: false
+        callback(isFavorite)
     }
 
     // Remove restaurant from favorites
     fun removeRestaurantFromFavorites(userId: String, restaurantId: String, callback: (Boolean) -> Unit) {
-        db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_FAVORITES)
-            .document(restaurantId)
-            .delete()
-            .addOnSuccessListener {
-                callback(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error removing restaurant from favorites", e)
-                callback(false)
-            }
+        favoriteRestaurants[userId]?.remove(restaurantId)
+        callback(true)
     }
 
     // Get all favorite restaurants
     fun getAllFavoriteRestaurants(userId: String, callback: (ArrayList<Restaurant>) -> Unit) {
-        db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_FAVORITES)
-            .get()
-            .addOnSuccessListener { documents ->
-                val restaurantList = ArrayList<Restaurant>()
-                for (document in documents) {
-                    val restaurant = Restaurant(
-                        document.getString("restaurantId") ?: "",
-                        document.getString("restaurantName") ?: "",
-                        document.getString("restaurantRating") ?: "",
-                        document.getString("costForOne") ?: "",
-                        document.getString("restaurantImage") ?: ""
-                    )
-                    restaurantList.add(restaurant)
-                }
-                callback(restaurantList)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting favorite restaurants", e)
-                callback(ArrayList())
-            }
+        val restaurantList = ArrayList<Restaurant>()
+        favoriteRestaurants[userId]?.values?.let { restaurantList.addAll(it) }
+        callback(restaurantList)
     }
 
     // Get all restaurants
-    fun getAllRestaurants(callback: (ArrayList<Restaurant>) -> Unit) {
-        db.collection(COLLECTION_RESTAURANTS)
-            .get()
-            .addOnSuccessListener { documents ->
-                val restaurantList = ArrayList<Restaurant>()
-                for (document in documents) {
-                    val restaurant = Restaurant(
-                        document.id,
-                        document.getString("name") ?: "",
-                        document.getString("rating") ?: "",
-                        document.getString("cost_for_one") ?: "",
-                        document.getString("image_url") ?: ""
-                    )
-                    restaurantList.add(restaurant)
-                }
-                callback(restaurantList)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting restaurants", e)
-                callback(ArrayList())
-            }
+    fun getAllRestaurants(context: Context, callback: (ArrayList<Restaurant>) -> Unit) {
+        // Use local data
+        val restaurants = LocalAssetManager.loadRestaurantsFromAssets(context)
+        callback(restaurants)
     }
 
     // Get restaurant menu
-    fun getRestaurantMenu(restaurantId: String, callback: (ArrayList<RestaurantMenu>) -> Unit) {
-        db.collection(COLLECTION_RESTAURANTS)
-            .document(restaurantId)
-            .collection(COLLECTION_MENU)
-            .get()
-            .addOnSuccessListener { documents ->
-                val menuList = ArrayList<RestaurantMenu>()
-                for (document in documents) {
-                    val menuItem = RestaurantMenu(
-                        document.id,
-                        document.getString("name") ?: "",
-                        document.getString("cost_for_one") ?: ""
-                    )
-                    menuList.add(menuItem)
-                }
-                callback(menuList)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting restaurant menu", e)
-                callback(ArrayList())
-            }
+    fun getRestaurantMenu(context: Context, restaurantId: String, callback: (ArrayList<RestaurantMenu>) -> Unit) {
+        // Use local data
+        val menuItems = LocalAssetManager.loadRestaurantMenu(context, restaurantId)
+        callback(menuItems)
     }
 
     // Add items to cart
     fun addItemToCart(userId: String, cartItem: CartItems, callback: (Boolean) -> Unit) {
-        val cartRef = db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_CART)
-            .document(cartItem.itemId)
-
-        val cartItemMap = hashMapOf(
-            "itemId" to cartItem.itemId,
-            "itemName" to cartItem.itemName,
-            "itemPrice" to cartItem.itemPrice,
-            "restaurantId" to cartItem.restaurantId
-        )
-
-        cartRef.set(cartItemMap)
-            .addOnSuccessListener {
-                callback(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error adding item to cart", e)
-                callback(false)
-            }
+        if (!cartItems.containsKey(userId)) {
+            cartItems[userId] = HashMap()
+        }
+        cartItems[userId]?.put(cartItem.itemId, cartItem)
+        callback(true)
     }
 
     // Get cart items
     fun getCartItems(userId: String, restaurantId: String, callback: (ArrayList<CartItems>) -> Unit) {
-        db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_CART)
-            .whereEqualTo("restaurantId", restaurantId)
-            .get()
-            .addOnSuccessListener { documents ->
-                val cartItems = ArrayList<CartItems>()
-                for (document in documents) {
-                    val cartItem = CartItems(
-                        document.getString("itemId") ?: "",
-                        document.getString("itemName") ?: "",
-                        document.getString("itemPrice") ?: "",
-                        document.getString("restaurantId") ?: ""
-                    )
-                    cartItems.add(cartItem)
-                }
-                callback(cartItems)
+        val items = ArrayList<CartItems>()
+        cartItems[userId]?.values?.forEach { item ->
+            if (item.restaurantId == restaurantId) {
+                items.add(item)
             }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting cart items", e)
-                callback(ArrayList())
-            }
+        }
+        callback(items)
     }
 
     // Clear cart
     fun clearCart(userId: String, callback: (Boolean) -> Unit) {
-        db.collection(COLLECTION_USERS)
-            .document(userId)
-            .collection(COLLECTION_CART)
-            .get()
-            .addOnSuccessListener { documents ->
-                val batch = db.batch()
-                for (document in documents) {
-                    batch.delete(document.reference)
-                }
-                batch.commit()
-                    .addOnSuccessListener {
-                        callback(true)
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e(TAG, "Error clearing cart", e)
-                        callback(false)
-                    }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting cart items to clear", e)
-                callback(false)
-            }
+        cartItems[userId]?.clear()
+        callback(true)
     }
 
     // Place order
     fun placeOrder(userId: String, restaurantId: String, restaurantName: String, totalCost: String, cartItems: ArrayList<CartItems>, callback: (Boolean) -> Unit) {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val currentDate = dateFormat.format(Date())
+        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         val orderId = UUID.randomUUID().toString()
-
-        val orderMap = hashMapOf(
-            "orderId" to orderId,
-            "restaurantId" to restaurantId,
-            "restaurantName" to restaurantName,
-            "totalCost" to totalCost,
-            "orderPlacedAt" to currentDate,
-            "userId" to userId
+        
+        val order = OrderHistoryRestaurant(
+            orderId,
+            restaurantName,
+            totalCost,
+            currentDate
         )
-
-        // Create order document
-        db.collection(COLLECTION_ORDERS)
-            .document(orderId)
-            .set(orderMap)
-            .addOnSuccessListener {
-                // Add order items as subcollection
-                val batch = db.batch()
-                cartItems.forEach { item ->
-                    val itemRef = db.collection(COLLECTION_ORDERS)
-                        .document(orderId)
-                        .collection("items")
-                        .document(item.itemId)
-                    
-                    val itemMap = hashMapOf(
-                        "itemId" to item.itemId,
-                        "itemName" to item.itemName,
-                        "itemPrice" to item.itemPrice
-                    )
-                    batch.set(itemRef, itemMap)
-                }
-                
-                batch.commit()
-                    .addOnSuccessListener {
-                        // Order placed successfully, now clear the cart
-                        clearCart(userId) { success ->
-                            callback(success)
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e(TAG, "Error adding order items", e)
-                        callback(false)
-                    }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error placing order", e)
-                callback(false)
-            }
+        
+        if (!orderHistory.containsKey(userId)) {
+            orderHistory[userId] = ArrayList()
+        }
+        
+        orderHistory[userId]?.add(order)
+        clearCart(userId) { success ->
+            callback(success)
+        }
     }
 
     // Get order history
     fun getOrderHistory(userId: String, callback: (ArrayList<OrderHistoryRestaurant>) -> Unit) {
-        db.collection(COLLECTION_ORDERS)
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { documents ->
-                val orderList = ArrayList<OrderHistoryRestaurant>()
-                for (document in documents) {
-                    val order = OrderHistoryRestaurant(
-                        document.getString("orderId") ?: "",
-                        document.getString("restaurantName") ?: "",
-                        document.getString("totalCost") ?: "",
-                        document.getString("orderPlacedAt") ?: ""
-                    )
-                    orderList.add(order)
-                }
-                callback(orderList)
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting order history", e)
-                callback(ArrayList())
-            }
+        val orders = orderHistory[userId] ?: ArrayList()
+        callback(orders)
     }
-} 
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Cheese Pizza",
+    "cost_for_one": "320"
+  },
+  {
+    "id": "2",
+    "name": "Farmhouse Pizza",
+    "cost_for_one": "380"
+  },
+  {
+    "id": "3",
+    "name": "Peppy Paneer Pizza",
+    "cost_for_one": "350"
+  },
+  {
+    "id": "4",
+    "name": "Garlic Breadsticks",
+    "cost_for_one": "120"
+  },
+  {
+    "id": "5",
+    "name": "Chicken Pizza",
+    "cost_for_one": "400"
+  },
+  {
+    "id": "6",
+    "name": "Cold Drink",
+    "cost_for_one": "60"
+  }
+]

@@ -13,6 +13,7 @@ import com.kartikey.foodrunner.R
 import com.kartikey.foodrunner.activity.RestaurantMenuActivity
 import com.kartikey.foodrunner.database.FirebaseHelper
 import com.kartikey.foodrunner.model.Restaurant
+import com.kartikey.foodrunner.utils.LocalAssetManager
 import com.squareup.picasso.Picasso
 
 
@@ -55,7 +56,7 @@ class DashboardFragmentAdapter(val context: Context, var itemList: ArrayList<Res
         holder.txtRating.text = restaurant.restaurantRating
         
         // Use Picasso to load images from local assets
-        val imageUrl = "file:///android_asset/${restaurant.restaurantImage}"
+        val imageUrl = LocalAssetManager.getImagePath(restaurant.restaurantImage)
         Picasso.get().load(imageUrl).error(R.drawable.ic_default_restaurant_image).into(holder.imgRestaurant)
 
         // Check if restaurant is favorite

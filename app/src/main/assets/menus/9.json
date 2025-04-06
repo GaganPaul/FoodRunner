@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Masala Dosa",
+    "cost_for_one": "120"
+  },
+  {
+    "id": "2",
+    "name": "Idli Sambar",
+    "cost_for_one": "80"
+  },
+  {
+    "id": "3",
+    "name": "Vada",
+    "cost_for_one": "60"
+  },
+  {
+    "id": "4",
+    "name": "Uttapam",
+    "cost_for_one": "100"
+  },
+  {
+    "id": "5",
+    "name": "Rava Dosa",
+    "cost_for_one": "140"
+  },
+  {
+    "id": "6",
+    "name": "Filter Coffee",
+    "cost_for_one": "40"
+  }
+]

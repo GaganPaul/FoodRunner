@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Hakka Noodles",
+    "cost_for_one": "180"
+  },
+  {
+    "id": "2",
+    "name": "Manchurian",
+    "cost_for_one": "200"
+  },
+  {
+    "id": "3",
+    "name": "Fried Rice",
+    "cost_for_one": "160"
+  },
+  {
+    "id": "4",
+    "name": "Spring Rolls",
+    "cost_for_one": "120"
+  },
+  {
+    "id": "5",
+    "name": "Chilli Potato",
+    "cost_for_one": "150"
+  },
+  {
+    "id": "6",
+    "name": "Chilli Paneer",
+    "cost_for_one": "180"
+  }
+]

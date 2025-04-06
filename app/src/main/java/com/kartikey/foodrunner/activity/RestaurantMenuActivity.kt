@@ -57,7 +57,7 @@ class RestaurantMenuActivity : AppCompatActivity() {
         if (ConnectionManager().checkConnectivity(this)) {
             restaurantMenuProgressDialog.visibility = View.VISIBLE
             
-            FirebaseHelper.getRestaurantMenu(restaurantId) { menuItems ->
+            FirebaseHelper.getRestaurantMenu(this, restaurantId) { menuItems ->
                 if (menuItems.isNotEmpty()) {
                     restaurantMenuList.clear()
                     restaurantMenuList.addAll(menuItems)

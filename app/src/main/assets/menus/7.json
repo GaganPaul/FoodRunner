@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Chicken Biryani",
+    "cost_for_one": "280"
+  },
+  {
+    "id": "2",
+    "name": "Veg Biryani",
+    "cost_for_one": "240"
+  },
+  {
+    "id": "3",
+    "name": "Mutton Biryani",
+    "cost_for_one": "320"
+  },
+  {
+    "id": "4",
+    "name": "Egg Biryani",
+    "cost_for_one": "220"
+  },
+  {
+    "id": "5",
+    "name": "Raita",
+    "cost_for_one": "40"
+  },
+  {
+    "id": "6",
+    "name": "Gulab Jamun",
+    "cost_for_one": "60"
+  }
+]
